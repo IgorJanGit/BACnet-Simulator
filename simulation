@@ -1,0 +1,30 @@
+import asyncio
+import BAC0
+
+async def main():
+    print("Starting BACnet simulation...")
+    try:
+        # Bind to all interfaces for broadcast
+        bacnet = BAC0.lite(ip='0.0.0.0/20')  # Listen on all interfaces
+        print("Fake BACnet device running. It will respond to WhoIs requests (broadcast and unicast).")
+
+        # Optionally, add a callback for Who-Is (if BAC0 supports it)
+        def whois_callback(*args, **kwargs):
+            print("Received Who-Is (broadcast or unicast)")
+
+        try:
+            bacnet._core._app._whois_callback = whois_callback
+        except Exception:
+            pass
+
+        await asyncio.sleep(3600)  # Keep running for 1 hour
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        try:
+            bacnet.stop()
+        except Exception:
+            pass
+
+if __name__ == "__main__":
+    asyncio.run(main())
